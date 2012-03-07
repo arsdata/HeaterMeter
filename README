@@ -1,22 +1,44 @@
-This is the source code respository for the HeaterMeter and LinkMeter BBQ grill controllers.
+This is the source code respository for the HeaterMeter and LinkMeter BBQ grill controllers with off the shelf
+JeeLabs components.
 
-+-----+ +-----+ +------+
-|Probe| |Probe| |Blower|
-+-----+ +-----+ +------+
-     |       |        |    2.5mm jacks
-A +-------------+     |
-V | HeaterMeter |-----/    (arduino/heatermeter)
-R +-------------+
-========|===============   Serial UART
-  +-----------------+
-O |   +-----------+ |
-p | L | linkmeter | |      (openwrt/package/linkmeter)
-e | u +-----------+ |
-n | C      |        |      /var/run/linkmeter.sock
-W | I  +-------+    |
-r | d  | httpd |    |
-t |    +-------+    |
-  +-----------------+
++-----+ +-----+  +------+
+|Probe| |Probe|  |Blower|
++-----+ +-----+  +------+
+   |       |        |
+   |-------|        |
+       |            |
+  +---------+   +--------+
+  | Analog  |   |  Motor |
+  |  Plug   |   |  Plug  |
+  +---------+   +--------+
+     |               |         |    2.5mm jacks
+A +----------------------+     |
+V |   JeeNode v6 NoRF    |-----/    (arduino/heatermeter/httpserver)
+R +----------------------+
+             |
+=============|===============       EtherCard (wired ethernet)
+             |
+     +-----------------+
+   O |   +-----------+ | 
+   p | L | linkmeter | |      (openwrt/package/linkmeter)
+   e | u +-----------+ |
+   n | C      |        |      /var/run/linkmeter.sock
+   W | I  +-------+    |
+   r | d  | httpd |    |
+   t |    +-------+    |
+     +-----------------+
+
+Will this work, I really don't know yet. I think so. :) I do not believe that there will be major changes
+to either the Heatermeter or LinkMeter code base other than adding a couple new classes to communicate with
+the DC Motor, Ether Card, and Analog Plugs. This could end quickly if the new libraries cause the app to run out 
+of memory for programming. Parts list for the project are:<br/>
+<ol>
+<li>1) <a href="http://jeelabs.com/products/jeenode">JeeNode V6 NoRF variant</a></li>
+<li>2) <a href="http://jeelabs.com/products/carrier-board">Carrier Board w/Box</a></li>
+<li>3) <a href="http://jeelabs.com/products/analog-plug">Analog Plug</a></li>
+<li>4) <a href="http://jeelabs.com/products/dc-motor-plug">DC Motor Plug</a></li>
+<li>5) <a href="http://jeelabs.com/products/ether-card">Ether Card</a></li>
+</ol><br/>
   
 Source Layout
 openwrt/* - Files you'd push to your router for LinkMeter
