@@ -3,16 +3,21 @@
 #include "grillpid.h"
 #include "strings.h"
 
-#ifdef HEATERMETER_NETWORKING
+#ifdef HEATERMETER_WIRELESS_NETWORKING
 state_t menuConnecting(button_t button);
 state_t menuNetworkInfo(button_t button);
-#endif  /* HEATERMETER_NETWORKING */
+#endif  /* HEATERMETER_WIRELESS_NETWORKING */
 
+// scratch space for edits
+int editInt;  
+char editString[17];
+
+#ifdef HEATERMETER_BUTTONLCD
 const menu_definition_t MENU_DEFINITIONS[] PROGMEM = {
-#ifdef HEATERMETER_NETWORKING
+#ifdef HEATERMETER_WIRELESS_NETWORKING
   { ST_CONNECTING, menuConnecting, 2 },
   { ST_NETWORK_INFO, menuNetworkInfo, 10 },
-#endif  /* HEATERMETER_NETWORKING */
+#endif  /* HEATERMETER_WIRELESS_NETWORKING */
   { ST_HOME_FOOD1, menuHome, 5 },
   { ST_HOME_FOOD2, menuHome, 5 },
   { ST_HOME_AMB, menuHome, 5 },
@@ -40,9 +45,9 @@ const menu_definition_t MENU_DEFINITIONS[] PROGMEM = {
 };
 
 const menu_transition_t MENU_TRANSITIONS[] PROGMEM = {
-#ifdef HEATERMETER_NETWORKING
+#ifdef HEATERMETER_WIRELESS_NETWORKING
   { ST_CONNECTING, BUTTON_TIMEOUT, ST_HOME_FOOD1 },
-#endif  /* HEATERMETER_NETWORKING */
+#endif  /* HEATERMETER_WIRELESS_NETWORKING */
   { ST_HOME_FOOD1, BUTTON_DOWN | BUTTON_TIMEOUT, ST_HOME_FOOD2 },
   { ST_HOME_FOOD1, BUTTON_RIGHT,   ST_SETPOINT },
   { ST_HOME_FOOD1, BUTTON_UP,      ST_HOME_AMB },
@@ -100,14 +105,14 @@ const menu_transition_t MENU_TRANSITIONS[] PROGMEM = {
   { ST_LIDOPEN_OFF, BUTTON_RIGHT, ST_LIDOPEN_DUR },
 
   { ST_LIDOPEN_DUR, BUTTON_LEFT | BUTTON_TIMEOUT, ST_HOME_FOOD1 },
-#ifdef HEATERMETER_NETWORKING
+#ifdef HEATERMETER_WIRELESS_NETWORKING
   { ST_LIDOPEN_DUR, BUTTON_RIGHT, ST_NETWORK_INFO },
 
   { ST_NETWORK_INFO, BUTTON_LEFT | BUTTON_TIMEOUT, ST_HOME_FOOD1 },
   { ST_NETWORK_INFO, BUTTON_RIGHT, ST_RESETCONFIG },
 #else
    { ST_LIDOPEN_DUR, BUTTON_RIGHT, ST_RESETCONFIG },
-#endif  /* HEATERMETER_NETWORKING */
+#endif  /* HEATERMETER_WIRELESS_NETWORKING */
 
   { ST_RESETCONFIG, BUTTON_LEFT | BUTTON_TIMEOUT, ST_HOME_FOOD1 },
   { ST_RESETCONFIG, BUTTON_RIGHT, ST_SETPOINT },
@@ -116,17 +121,14 @@ const menu_transition_t MENU_TRANSITIONS[] PROGMEM = {
 };
 
 MenuSystem Menus(MENU_DEFINITIONS, MENU_TRANSITIONS, &readButton);
-// scratch space for edits
-int editInt;  
-char editString[17];
 
-#ifdef HEATERMETER_NETWORKING
+#ifdef HEATERMETER_WIRELESS_NETWORKING
 extern "C" {
 #include "witypes.h"
 #include "g2100.h"
 extern char ssid[];
 }
-#endif /* HEATERMETER_NETWORKING */
+#endif /* HEATERMETER_WIRELESS_NETWORKING */
 
 button_t readButton(void)
 {
@@ -197,7 +199,7 @@ state_t menuHome(button_t button)
   return ST_AUTO;
 }
 
-#ifdef HEATERMETER_NETWORKING
+#ifdef HEATERMETER_WIRELESS_NETWORKING
 state_t menuConnecting(button_t button)
 {
   lcdprint_P(PSTR("Connecting to"), true); 
@@ -219,7 +221,7 @@ state_t menuNetworkInfo(button_t button)
   }
   return ST_AUTO;
 }
-#endif /* HEATERMETER_NETWORKING */
+#endif /* HEATERMETER_WIRELESS_NETWORKING */
 
 void menuBooleanEdit(button_t button, const prog_char *preamble)
 {
@@ -532,4 +534,6 @@ state_t menuProbeAlarmVal(button_t button)
   menuNumberEdit(button, 5, (highOrLow == ST_PALARM0_H_VAL) ? PSTR("High Alrm %4d"DEGREE"%c") : PSTR("Low Alrm %5d"DEGREE"%c"));
   return ST_AUTO;
 }
+
+#endif /* HEATERMETER_BUTTONLCD */
 

@@ -3,6 +3,7 @@
 #include <avr/pgmspace.h>
 #include "menus.h"
 
+#ifdef HEATERMETER_BUTTONLCD
 MenuSystem::MenuSystem(const menu_definition_t *defs, const menu_transition_t *trans,
   const buttonread_t reader)
   : m_definitions(defs), m_transitions(trans), m_readButton(reader)
@@ -110,3 +111,4 @@ void MenuSystem::doWork(void)
 
   setState(newState);
 }
+#endif /* HEATERMETER_BUTTONLCD */

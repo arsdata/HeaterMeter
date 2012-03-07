@@ -5,6 +5,8 @@
 #include <avr/pgmspace.h>
 #include "menus.h"
 
+#ifdef HEATERMETER_BUTTONLCD
+
 #define BUTTON_LEFT  (1<<0)
 #define BUTTON_RIGHT (1<<1)
 #define BUTTON_UP    (1<<2)
@@ -72,6 +74,7 @@ state_t menuProbeAlarmVal(button_t button);
 
 extern MenuSystem Menus;
 extern int editInt;  
-extern char editString[];
 
+#endif /* HEATERMETER_BUTTONLCD */
+extern char editString[];
 #endif /* __HMMENUS_H__ */

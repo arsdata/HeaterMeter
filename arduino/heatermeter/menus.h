@@ -2,6 +2,7 @@
 #ifndef __MENUS_H__
 #define __MENUS_H__
 
+#ifdef HEATERMETER_BUTTONLCD
 // The first BUTTON_s are pseudo-buttons to indicate state changes
 // No button pressed
 #define BUTTON_NONE  0
@@ -60,5 +61,5 @@ private:
 
   state_t findTransition(button_t button) const;
 };
-
+#endif /* HEATERMETER_BUTTONLCD */
 #endif /* __MENUS_H__ */

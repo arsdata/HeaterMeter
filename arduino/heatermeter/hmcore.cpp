@@ -4,7 +4,7 @@
 
 #include "hmcore.h"
 
-#ifdef HEATERMETER_NETWORKING
+#ifdef HEATERMETER_WIRELESS_NETWORKING
 #include <WiServer.h>  
 #endif
 
@@ -19,21 +19,25 @@
 
 #include "strings.h"
 
+//#ifndef HEATERMETER_JEENODE
 static TempProbe probe0(PIN_PIT);
 static TempProbe probe1(PIN_FOOD1);
 static TempProbe probe2(PIN_FOOD2);
 static TempProbe probe3(PIN_AMB);
 GrillPid pid(PIN_BLOWER);
+//#endif /* ~HEATERMETER_JEENODE */
 
+#ifdef HEATERMETER_BUTTONLCD
 #ifdef SHIFTREGLCD_SPI
 ShiftRegLCD lcd(PIN_LCD_CLK, 2);
 #else
 ShiftRegLCD lcd(PIN_LCD_DATA, PIN_LCD_CLK, TWO_WIRE, 2); 
 #endif /* SHIFTREGLCD_SPI */
+#endif /* HEATERMETER_BUTTONLCD */
 
-#ifdef HEATERMETER_NETWORKING
+#ifdef HEATERMETER_WIRELESS_NETWORKING
 static boolean g_NetworkInitialized;
-#endif /* HEATERMETER_NETWORKING */
+#endif /* HEATERMETER_WIRELESS_NETWORKING */
 #ifdef HEATERMETER_SERIAL
 static char g_SerialBuff[64]; 
 #endif /* HEATERMETER_SERIAL */
@@ -56,7 +60,9 @@ const struct __eeprom_data {
   float pidConstants[4]; // constants are stored Kb, Kp, Ki, Kd
   boolean manualMode;
   unsigned char maxFanSpeed;  // in percent
-  unsigned char lcdBacklight; // in PWM (max 255)
+#ifdef HEATERMETER_BUTTONLCD
+unsigned char lcdBacklight; // in PWM (max 255)
+#endif /* HEATERMETER_BUTTONLCD */
 #ifdef HEATERMETER_RFM12
   rf12_map_item_t rfMap[TEMP_COUNT];
 #endif
@@ -69,7 +75,9 @@ const struct __eeprom_data {
   { 4.0f, 3.0f, 0.01f, 5.0f },  // PID constants
   false, // manual mode
   100,  // max fan speed
+#ifdef HEATERMETER_BUTTONLCD
   128, // lcd backlight (50%)
+#endif /* HEATERMETER_BUTTONLCD */
 #ifdef HEATERMETER_RFM12
   {{ RFSOURCEID_NONE, 0 }, { RFSOURCEID_NONE, 0 }, { RFSOURCEID_NONE, 0 }, { RFSOURCEID_NONE, 0 }},  // rfMap
 #endif
@@ -104,10 +112,12 @@ unsigned char tone_idx;
 unsigned long tone_last;
 #endif /* PIZEO_HZ */
 
+#ifdef HEATERMETER_BUTTONLCD
 inline void setLcdBacklight(unsigned char lcdBacklight)
 {
   analogWrite(PIN_LCD_BACKLGHT, lcdBacklight);
 }
+#endif /* HEATERMETER_BUTTONLCD */
 
 // Note the storage loaders and savers expect the entire config storage is less than 256 bytes
 unsigned char getProbeConfigOffset(unsigned char probeIndex, unsigned char off)
@@ -267,6 +277,7 @@ void storeMaxFanSpeed(unsigned char maxFanSpeed)
   config_store_byte(maxFanSpeed, maxFanSpeed);
 }
 
+#ifdef HEATERMETER_BUTTONLCD
 void storeLcdBacklight(unsigned char lcdBacklight)
 {
   setLcdBacklight(lcdBacklight);
@@ -332,6 +343,7 @@ void lcdprint_P(const prog_char *p, const boolean doClear)
     lcd.clear();
   while (unsigned char c = pgm_read_byte(p++)) lcd.write(c);
 }
+#endif /* HEATERMETER_BUTTONLCD */
 
 void storePidParam(char which, float value)
 {
@@ -360,7 +372,7 @@ inline void outputCsv(void)
 #endif /* HEATERMETER_SERIAL */
 }
 
-#if defined(HEATERMETER_NETWORKING) || defined(HEATERMETER_SERIAL)
+#if defined(HEATERMETER_WIRELESS_NETWORKING) || defined(HEATERMETER_SERIAL) || defined(HEATERMETER_JEENODE)
 void printSciFloat(float f)
 {
   // This function could use a rework, it is pretty expensive
@@ -494,6 +506,7 @@ void reportLidParameters(void)
   Serial_nl();
 }
 
+#ifdef HEATERMETER_BUTTONLCD
 void reportLcdBacklight(void)
 {
   print_P(PSTR("$HMLB" CSV_DELIMITER));
@@ -502,6 +515,7 @@ void reportLcdBacklight(void)
   Serial.print(lb, DEC);
   Serial_nl();
 }
+#endif /* HEATERMETER_BUTTONLCD */
 
 void reportProbeCoeffs(void)
 {
@@ -517,7 +531,9 @@ void reportConfig(void)
   reportProbeCoeffs();
   reportProbeOffsets();
   reportLidParameters();
+#ifdef HEATERMETER_BUTTONLCD
   reportLcdBacklight();
+#endif /* HEATERMETER_BUTTONLCD */
 #ifdef HEATERMETER_RFM12
   reportRfMap();  
 #endif /* HEATERMETER_RFM12 */
@@ -579,12 +595,14 @@ boolean handleCommandUrl(char *URL)
     storePidUnits(URL[urlLen-1]);
     return true;
   }
+#ifdef HEATERMETER_BUTTONLCD
   if (strncmp_P(URL, PSTR("set?lb="), 7) == 0) 
   {
     storeLcdBacklight(atoi(URL + 7));
     reportLcdBacklight();
     return true;
   }
+#endif /* HEATERMETER_BUTTONLCD */
   if (strncmp_P(URL, PSTR("set?ld="), 7) == 0) 
   {
     csvParseI(URL + 7, storeLidParam);
@@ -629,7 +647,7 @@ boolean handleCommandUrl(char *URL)
   
   return false;
 }
-#endif /* defined(HEATERMETER_NETWORKING) || defined(HEATERMETER_SERIAL) */
+#endif /* defined(HEATERMETER_WIRELESS_NETWORKING) || defined(HEATERMETER_SERIAL) || defined(HEATERMETER_JEENODE) */
 
 void outputRfStatus(void)
 {
@@ -640,7 +658,7 @@ void outputRfStatus(void)
 #endif /* defined(HEATERMETER_SERIAL) && defined(HEATERMETER_RFM12) */
 }
 
-#ifdef HEATERMETER_NETWORKING
+#ifdef HEATERMETER_WIRELESS_NETWORKING
 
 #ifdef DFLASH_SERVING 
 #define HTTP_HEADER_LENGTH 19 // "HTTP/1.0 200 OK\r\n\r\n"
@@ -798,7 +816,7 @@ boolean sendPage(char* URL)
   
   return false;
 }
-#endif /* HEATERMETER_NETWORKING */
+#endif /* HEATERMETER_WIRELESS_NETWORKING */
 
 #ifdef HEATERMETER_RFM12
 void rfSourceNotify(RFSource &r, RFManager::event e)
@@ -902,7 +920,9 @@ void eepromLoadBaseConfig(boolean forceDefault)
   if (config.manualMode)
     pid.setFanSpeed(0);
   pid.MaxFanSpeed = config.maxFanSpeed;
+#ifdef HEATERMETER_BUTTONLCD
   setLcdBacklight(config.lcdBacklight);
+#endif /* HEATERMETER_BUTTONLCD */
   pid.setUnits(config.pidUnits == 'C' ? 'C' : 'F');
   
 #ifdef HEATERMETER_RFM12
@@ -950,13 +970,13 @@ void eepromLoadConfig(boolean forceDefault)
 
 void blinkLed(void)
 {
-#ifndef HEATERMETER_NETWORKING  
+#ifndef HEATERMETER_WIRELESS_NETWORKING  
   pinMode(PIN_WIRELESS_LED, OUTPUT);
   digitalWrite(PIN_WIRELESS_LED, HIGH);
   delay(100);
   digitalWrite(PIN_WIRELESS_LED, LOW);
   delay(50);
-#endif // !HEATERMETER_NETWORKING
+#endif // !HEATERMETER_WIRELESS_NETWORKING
 }
 
 #ifdef HEATERMETER_SERIAL
@@ -989,7 +1009,9 @@ inline void newTempsAvail(void)
   static unsigned char pidCycleCount;
 
   checkAlarms();
+#ifdef HEATERMETER_BUTTONLCD
   updateDisplay();
+#endif /* HEATERMETER_BUTTONLCD */
   ++pidCycleCount;
     
   if ((pidCycleCount % 0x10) == 0)
@@ -1033,7 +1055,7 @@ void hmcoreSetup(void)
   // SoftReset and WiShield are mutually exlusive, but it is HIGH/OUTPUT too
   digitalWrite(PIN_SOFTRESET, HIGH);
   pinMode(PIN_SOFTRESET, OUTPUT);
-  
+    
   pid.Probes[TEMP_PIT] = &probe0;
   pid.Probes[TEMP_FOOD1] = &probe1;
   pid.Probes[TEMP_FOOD2] = &probe2;
@@ -1044,7 +1066,7 @@ void hmcoreSetup(void)
   checkInitRfManager();
 #endif
 
-#ifdef HEATERMETER_NETWORKING
+#ifdef HEATERMETER_WIRELESS_NETWORKING
   dflashInit();
   
   g_NetworkInitialized = readButton() == BUTTON_NONE;
@@ -1053,8 +1075,10 @@ void hmcoreSetup(void)
     Menus.setState(ST_CONNECTING);
     WiServer.init(sendPage);
   }
-#endif  /* HEATERMETER_NETWORKING */
+#endif  /* HEATERMETER_WIRELESS_NETWORKING */
+#ifdef HEATERMETER_BUTTONLCD
   Menus.setState(ST_HOME_NOPROBES);
+#endif /* HEATERMETER_BUTTONLCD */
 
   // BLINK 2: Initialization complete
   blinkLed();
@@ -1076,12 +1100,14 @@ void hmcoreLoop(void)
     digitalWrite(PIN_WIRELESS_LED, LOW);
 #endif /* HEATERMETER_RFM12 */
 
-#ifdef HEATERMETER_NETWORKING 
+#ifdef HEATERMETER_WIRELESS_NETWORKING 
   if (g_NetworkInitialized)
     WiServer.server_task(); 
-#endif /* HEATERMETER_NETWORKING */
+#endif /* HEATERMETER_WIRELESS_NETWORKING */
 
+#if HEATERMETER_BUTTONLCD
   Menus.doWork();
+#endif /* HEATERMETER_BUTTONLCD */
   if (pid.doWork())
     newTempsAvail();
   tone_doWork();
