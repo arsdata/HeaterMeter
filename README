@@ -36,7 +36,7 @@ R +----------------------+
 Will this work, I really don't know yet. I think so. :) I do not believe that there will be major changes
 to either the Heatermeter or LinkMeter code base other than adding a couple new classes to communicate with
 the DC Motor, Ether Card, and Analog Plugs. This could end quickly if the new libraries cause the app to run out 
-of memory for programming. Parts list for the project are:<br/>
+of memory for programming. Parts list for the project are:
 
 1) JeeNode V6 NoRF variant - http://jeelabs.com/products/jeenode
 2) Carrier Board w/Box - http://jeelabs.com/products/carrier-board">Carrier Board w/Box
