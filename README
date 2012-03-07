@@ -16,7 +16,12 @@ A +----------------------+     |
 V |   JeeNode v6 NoRF    |-----/    (arduino/heatermeter/httpserver)
 R +----------------------+
              |
-=============|===============       EtherCard (wired ethernet)
+             |
+     +--------------+
+     |  Ether Card  |
+     +--------------+
+             |
+=============|===============       (wired ethernet)
              |
      +-----------------+
    O |   +-----------+ | 
@@ -32,13 +37,13 @@ Will this work, I really don't know yet. I think so. :) I do not believe that th
 to either the Heatermeter or LinkMeter code base other than adding a couple new classes to communicate with
 the DC Motor, Ether Card, and Analog Plugs. This could end quickly if the new libraries cause the app to run out 
 of memory for programming. Parts list for the project are:<br/>
-<ol>
-<li>1) <a href="http://jeelabs.com/products/jeenode">JeeNode V6 NoRF variant</a></li>
-<li>2) <a href="http://jeelabs.com/products/carrier-board">Carrier Board w/Box</a></li>
-<li>3) <a href="http://jeelabs.com/products/analog-plug">Analog Plug</a></li>
-<li>4) <a href="http://jeelabs.com/products/dc-motor-plug">DC Motor Plug</a></li>
-<li>5) <a href="http://jeelabs.com/products/ether-card">Ether Card</a></li>
-</ol><br/>
+
+1) JeeNode V6 NoRF variant - http://jeelabs.com/products/jeenode
+2) Carrier Board w/Box - http://jeelabs.com/products/carrier-board">Carrier Board w/Box
+3) Analog Plug - http://jeelabs.com/products/analog-plug
+4) DC Motor Plug - http://jeelabs.com/products/dc-motor-plug
+5) Ether Card - http://jeelabs.com/products/ether-card
+
   
 Source Layout
 openwrt/* - Files you'd push to your router for LinkMeter
