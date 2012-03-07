@@ -37,7 +37,10 @@ Will this work, I really don't know yet. I think so. :) I do not believe
 that there will be major changes to either the Heatermeter or LinkMeter code 
 base other than adding a couple new classes to communicate with the DC Motor, 
 Ether Card, and Analog Plugs. This could end quickly if the new libraries cause 
-the app to run out of memory for programming. 
+the app to run out of memory for programming. One other advantage of this approach
+is the any router with OpenWRT installed could be used regardless of availablity
+of a serial port, meaning that the LinkMeter could be implemented without having
+to open the case and solder in a serial header.
 
 Parts list for the project are:
 
